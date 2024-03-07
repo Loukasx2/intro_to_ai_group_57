@@ -196,8 +196,6 @@ class GameEngine():
                     number_of_occupied_positions += 1
                     if self.matrix[goal[i][0]][goal[i][1]] == index + 1:
                         number_of_self_occupied_positions += 1
-            print(f"Number of occupied positions: {number_of_occupied_positions}")
-            print(f"Number of self occupied positions: {number_of_self_occupied_positions}")
             if number_of_occupied_positions == len(goal) and number_of_self_occupied_positions != len(goal):
                 return True
         return False
