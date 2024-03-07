@@ -187,7 +187,6 @@ class GameEngine():
         self.screen.blit(text_render, (text_pos_x, text_pos_y))
 
     def check_winner(self):
-        #TODO: Implement the winner function
         for index, goal in enumerate(self.players_list):
             number_of_occupied_positions = 0
             number_of_self_occupied_positions = 0
