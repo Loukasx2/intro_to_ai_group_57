@@ -185,8 +185,19 @@ class GameEngine():
         text_render = text_font.render(text, True, col)
         self.screen.blit(text_render, (text_pos_x, text_pos_y))
 
-    def check_winner(self,):
+    def check_winner(self):
         #TODO: Implement the winner function
+        for goal in self.players_list:
+            for i in range(len(goal)):
+                number_of_occupied_positions = 0
+                number_of_self_occupied_positions = 0
+                if self.matrix[goal[i][0]][goal[i][1]] > 0:
+                    number_of_occupied_positions += 1
+                    if self.matrix[goal[i][0]][goal[i][1]] == i + 1:
+                        number_of_self_occupied_positions += 1
+                if number_of_occupied_positions == len(goal) and number_of_self_occupied_positions != len(goal):
+                    print(f"Player {i + 1} loses!")
+                    return True
         return False
     
     def get_player_pawns(self,player_index):
