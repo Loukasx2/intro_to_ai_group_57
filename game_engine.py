@@ -22,7 +22,7 @@ class Colors:
     PURPLE = (218, 102, 255)  # Lighter purple
     BLUE = (0, 102, 204)      # Darker blue
     BLACK = (51, 51, 51)      # Modified black
-    GREY = (160, 160, 160)
+    GREY = (125, 125, 125)
     WHITE = (240, 240, 240)   # Modified white
 
 class GameEngine():
@@ -89,15 +89,15 @@ class GameEngine():
         for i in range(0, 17):
             for j in range(0, 25):
                 if self.matrix[i][j] >= 0:
-                    rect = pygame.Rect(
-                        j * CELL_SIZE, i * CELL_SIZE * y_scaling_factor, CELL_SIZE, CELL_SIZE
-                    )
+                    if self.matrix[i][j] == 0:
+                        circle_center = (j * CELL_SIZE + CELL_SIZE/2, i * CELL_SIZE * y_scaling_factor + CELL_SIZE/2)
+                        circle_radius = CELL_SIZE/4
+                    else:
+                        circle_center = (j * CELL_SIZE + CELL_SIZE/2, i * CELL_SIZE * y_scaling_factor + CELL_SIZE/2)
+                        circle_radius = CELL_SIZE/2
                     self.pawns_rect.append(
-                        pygame.draw.rect(
-                            self.screen,
-                            colors[int(self.matrix[i][j])],
-                            rect,
-                            border_radius=20,
+                        pygame.draw.circle(
+                            self.screen, colors[int(self.matrix[i][j])], circle_center, circle_radius,
                         )
                     )
 
@@ -162,12 +162,15 @@ class GameEngine():
         for i in range(0, 17):
             for j in range(0, 25):
                 if self.matrix[i][j] >= 0:
-                    rect = pygame.Rect(
-                        j * CELL_SIZE, i * CELL_SIZE * y_scaling_factor, CELL_SIZE, CELL_SIZE
-                    )
+                    if self.matrix[i][j] == 0:
+                        circle_center = (int(j * CELL_SIZE + CELL_SIZE/2), int(i * CELL_SIZE * y_scaling_factor + CELL_SIZE/2))
+                        circle_radius = int(CELL_SIZE/4)
+                    else:
+                        circle_center = (int(j * CELL_SIZE + CELL_SIZE/2), int(i * CELL_SIZE * y_scaling_factor + CELL_SIZE/2))
+                        circle_radius = int(CELL_SIZE/2)
                     self.pawns_rect.append(
-                        pygame.draw.rect(
-                            self.screen, colors[int(self.matrix[i][j])], rect, border_radius=CELL_SIZE
+                        pygame.draw.circle(
+                            self.screen, colors[int(self.matrix[i][j])], circle_center, circle_radius,
                         )
                     )
                 if [i, j] in moves:
