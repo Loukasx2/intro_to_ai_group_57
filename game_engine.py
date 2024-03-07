@@ -4,6 +4,7 @@ import numpy
 import sys
 import threading
 import flask
+import logging
 
 color_light = (202, 203, 213)
 color_dark = (2, 6, 145)
@@ -187,17 +188,18 @@ class GameEngine():
 
     def check_winner(self):
         #TODO: Implement the winner function
-        for goal in self.players_list:
+        for index, goal in enumerate(self.players_list):
+            number_of_occupied_positions = 0
+            number_of_self_occupied_positions = 0
             for i in range(len(goal)):
-                number_of_occupied_positions = 0
-                number_of_self_occupied_positions = 0
                 if self.matrix[goal[i][0]][goal[i][1]] > 0:
                     number_of_occupied_positions += 1
-                    if self.matrix[goal[i][0]][goal[i][1]] == i + 1:
+                    if self.matrix[goal[i][0]][goal[i][1]] == index + 1:
                         number_of_self_occupied_positions += 1
-                if number_of_occupied_positions == len(goal) and number_of_self_occupied_positions != len(goal):
-                    print(f"Player {i + 1} loses!")
-                    return True
+            print(f"Number of occupied positions: {number_of_occupied_positions}")
+            print(f"Number of self occupied positions: {number_of_self_occupied_positions}")
+            if number_of_occupied_positions == len(goal) and number_of_self_occupied_positions != len(goal):
+                return True
         return False
     
     def get_player_pawns(self,player_index):
@@ -248,6 +250,7 @@ class GameEngine():
                 event = pygame.event.wait()
                 self.screen.fill(pygame.Color(Colors.BLACK))
                 self.add_selected_effect()
+                game_on = not self.check_winner()
             else:
                 pygame.display.update()
                 event = pygame.event.wait()
@@ -289,7 +292,22 @@ class GameEngine():
                         game_on = not self.check_winner()
             pygame.display.update()
 
+        self.write_text(
+            "We have a winner!",
+            num_columns * CELL_SIZE - 370,
+            num_rows * CELL_SIZE + 30,
+            50,
+            Colors.WHITE,
+        )
+        pygame.display.update()
+        time.tick(60 * 250) 
+
+    def __del__(self):
+        print("Game ended.")
+        pygame.quit()
+
 if __name__ == "__main__":
+    print("Welcome to the game of Chinese Checkers!")
     if len(sys.argv) < 2:
         print(
             "Default number of players is 2. If you want to change it, please provide a valid integer as an argument."
@@ -305,11 +323,13 @@ if __name__ == "__main__":
     game = GameEngine(number_of_players)
     # run game in thread
     game_thread = threading.Thread(target=game.run)
+    game_thread.daemon = True
     game_thread.start()
     print("Game is running...")
 
     # create an API to interact with the game
     app = flask.Flask(__name__)
+    logging.getLogger('werkzeug').disabled = True
 
     @app.route("/get_player_pawns/<int:player_index>", methods=["GET"])
     def get_player_pawns(player_index):
