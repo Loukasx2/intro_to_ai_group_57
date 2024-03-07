@@ -76,6 +76,8 @@ def SixPlayers(number_of_players):
             matrix[player[i][0]][player[i][1]] = index
         index += 1
 
+    print(np.matrix(matrix))
+
     def draw_pawns():
         colors = [Colors.GREY, Colors.RED, Colors.YELLOW, Colors.ORANGE, Colors.GREEN, Colors.PURPLE, Colors.BLUE]
         for i in range(0, 17):
@@ -161,6 +163,22 @@ def SixPlayers(number_of_players):
     def check_winner():
         #TODO: Implement the winner function
         return False
+    
+    def get_player_pawns(player_index):
+        pawns = []
+        for i in range(17):
+            for j in range(25):
+                if matrix[i][j] == player_index:
+                    pawns.append([i, j])
+        return pawns
+
+    def get_all_possible_player_moves(player_index):
+        moves = []
+        for i in range(17):
+            for j in range(25):
+                if matrix[i][j] == player_index:
+                    moves += get_valid_moves([i, j])
+        return moves
 
     num_columns = 25
     num_rows = 25
@@ -180,52 +198,53 @@ def SixPlayers(number_of_players):
 
     while game_on:
         col = player_colours[player_index - 1]
-        
-        if check_winner() == False:
-            write_text(
-                "Player " + str(player_index) + "'s Turn",
-                num_columns * CELL_SIZE - 370,
-                num_rows * CELL_SIZE + 30,
-                50,
-                col,
-            )
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+        write_text(
+            "Player " + str(player_index) + "'s Turn",
+            num_columns * CELL_SIZE - 370,
+            num_rows * CELL_SIZE + 30,
+            50,
+            col,
+        )
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
+        event = pygame.event.wait()
 
-                # get a list of all sprites that are under the mouse cursor
-                clicked_sprites = [s for s in pawns_rect if s.collidepoint(pos)]
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
 
-                if clicked_sprites:
-                    clicked_token = get_token_coor(
-                        clicked_sprites[0].x, clicked_sprites[0].y
-                    )
-                    if matrix[clicked_token[0], clicked_token[1]] == player_index:
-                        if clicked_token == last_selected_token:
-                            last_selected_token = []
-                            player_valid_moves = []
-                        else:
-                            player_valid_moves = get_valid_moves(clicked_token)
-                            last_selected_token = clicked_token
-                        screen.fill(pygame.Color(Colors.BLACK))
-                        add_selected_effect(player_valid_moves, last_selected_token)
-                    elif clicked_token in player_valid_moves:
-                        move(last_selected_token, clicked_token)
-                        check_winner()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+
+            # get a list of all sprites that are under the mouse cursor
+            clicked_sprites = [s for s in pawns_rect if s.collidepoint(pos)]
+
+            if clicked_sprites:
+                clicked_token = get_token_coor(
+                    clicked_sprites[0].x, clicked_sprites[0].y
+                )
+                if matrix[clicked_token[0], clicked_token[1]] == player_index:
+                    if clicked_token == last_selected_token:
                         last_selected_token = []
                         player_valid_moves = []
-                        screen.fill(pygame.Color(Colors.BLACK))
-                        player_index = (player_index + 1) % (number_of_players + 1)
-                        if player_index == 0:
-                            player_index += 1
-                        add_selected_effect()
+                    else:
+                        player_valid_moves = get_valid_moves(clicked_token)
+                        last_selected_token = clicked_token
+                    screen.fill(pygame.Color(Colors.BLACK))
+                    add_selected_effect(player_valid_moves, last_selected_token)
+                elif clicked_token in player_valid_moves:
+                    move(last_selected_token, clicked_token)
+                    check_winner()
+                    last_selected_token = []
+                    player_valid_moves = []
+                    screen.fill(pygame.Color(Colors.BLACK))
+                    player_index = (player_index + 1) % (number_of_players + 1)
+                    if player_index == 0:
+                        player_index += 1
+                    add_selected_effect()
+
+                game_on = not check_winner()
         pygame.display.update()
-        timer.tick(60)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
