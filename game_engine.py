@@ -6,6 +6,8 @@ import threading
 import flask
 import logging
 
+from useful_functions import *
+
 color_light = (202, 203, 213)
 color_dark = (2, 6, 145)
 y_scaling_factor = 1.5
@@ -29,6 +31,7 @@ class Colors:
 class GameEngine():
     def __init__(self, number_of_players):
         pygame.init()
+        self.useful_functions = UsefulFunctions()
         self.matrix = numpy.ones((17, 25)) * -1
         self.number_of_players = number_of_players
         self.ai_player_numbers = [2, 3, 4, 5, 6]
@@ -102,40 +105,11 @@ class GameEngine():
                         )
                     )
 
-    def get_valid_moves(self,coor):
-        valid_index = []
-        for i in range(len(self.move_index)):
-
-            x = coor[0] + self.move_index[i][0]
-            y = coor[1] + self.move_index[i][1]
-            if -1 < x < 17 and -1 < y < 25:
-                if self.matrix[x][y] == 0:
-                    valid_index.append([x, y])
-                elif self.matrix[x][y] != -1:
-                    self.check_path(self.move_index[i], x, y, valid_index)
-
-        return valid_index
-
-    def check_path(self,path_coor, x, y, moves_array):
-        x2 = x + path_coor[0]
-        y2 = y + path_coor[1]
-        if [x2, y2] not in moves_array:
-            if -1 < x2 < 17 and -1 < y2 < 25:
-                if self.matrix[x2][y2] == 0:
-                    moves_array.append([x2, y2])
-                    for j in range(len(self.move_index)):
-                        x3 = x2 + self.move_index[j][0]
-                        y3 = y2 + self.move_index[j][1]
-                        if [x3, y3] not in moves_array:
-                            if -1 < x3 < 17 and -1 < y3 < 25:
-                                if self.matrix[x3][y3] > 0:
-                                    self.check_path(self.move_index[j], x3, y3, moves_array)
-
     def move(self, pos, target, ai_move=False):
         if self.player_index != self.matrix[pos[0]][pos[1]]:
             print(f"Invalid move. Not your turn. Player {self.player_index} is playing and you are trying to move player {self.matrix[pos[0]][pos[1]]}'s pawn.")
             return False
-        valid_moves = self.get_valid_moves(pos)
+        valid_moves = self.useful_functions.get_valid_moves(self.matrix, pos)
         if target not in valid_moves:
             print("Invalid move. Target not in valid moves.")
             return False
@@ -206,14 +180,6 @@ class GameEngine():
                 if self.matrix[i][j] == player_index:
                     pawns.append([i, j])
         return pawns
-
-    def get_all_possible_player_moves(self,player_index):
-        moves = []
-        for i in range(17):
-            for j in range(25):
-                if self.matrix[i][j] == player_index:
-                    moves += self.get_valid_moves([i, j])
-        return moves
     
     def is_ai_turn(self, player_index):
         return player_index == self.player_index
@@ -232,72 +198,83 @@ class GameEngine():
 
         player_colours = [Colors.RED, Colors.YELLOW, Colors.ORANGE, Colors.GREEN, Colors.PURPLE, Colors.BLUE]
 
-        while game_on:
-            col = player_colours[self.player_index - 1]
+        try:
+            while game_on:
+                col = player_colours[self.player_index - 1]
+
+                self.write_text(
+                    "Player " + str(self.player_index) + "'s Turn",
+                    num_columns * CELL_SIZE - 370,
+                    num_rows * CELL_SIZE + 30,
+                    50,
+                    col,
+                )
+
+                if self.player_index in self.ai_player_numbers:
+                    event = pygame.event.wait()
+
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                    self.screen.fill(pygame.Color(Colors.BLACK))
+                    self.add_selected_effect()
+                    game_on = not self.check_winner()
+                else:
+                    pygame.display.update()
+                    event = pygame.event.wait()
+
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        pos = pygame.mouse.get_pos()
+
+                        # get a list of all sprites that are under the mouse cursor
+                        clicked_sprites = [s for s in self.pawns_rect if s.collidepoint(pos)]
+
+                        if clicked_sprites:
+                            clicked_token = self.get_token_coor(
+                                clicked_sprites[0].x, clicked_sprites[0].y
+                            )
+                            if self.matrix[clicked_token[0], clicked_token[1]] == self.player_index:
+                                if clicked_token == last_selected_token:
+                                    last_selected_token = []
+                                    player_valid_moves = []
+                                else:
+                                    player_valid_moves = self.useful_functions.get_valid_moves(self.matrix, clicked_token)
+                                    last_selected_token = clicked_token
+                                self.screen.fill(pygame.Color(Colors.BLACK))
+                                self.add_selected_effect(player_valid_moves, last_selected_token)
+                            elif clicked_token in player_valid_moves:
+                                self.move(last_selected_token, clicked_token)
+                                self.check_winner()
+                                last_selected_token = []
+                                player_valid_moves = []
+                                self.screen.fill(pygame.Color(Colors.BLACK))
+                                self.player_index = (self.player_index + 1) % (self.number_of_players + 1)
+                                if self.player_index == 0:
+                                    self.player_index += 1
+                                self.add_selected_effect()
+
+                            game_on = not self.check_winner()
+                pygame.display.update()
 
             self.write_text(
-                "Player " + str(self.player_index) + "'s Turn",
+                "We have a winner!",
                 num_columns * CELL_SIZE - 370,
                 num_rows * CELL_SIZE + 30,
                 50,
-                col,
+                Colors.WHITE,
             )
-
-            if self.player_index in self.ai_player_numbers:
-                event = pygame.event.wait()
-                self.screen.fill(pygame.Color(Colors.BLACK))
-                self.add_selected_effect()
-                game_on = not self.check_winner()
-            else:
-                pygame.display.update()
-                event = pygame.event.wait()
-
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    pos = pygame.mouse.get_pos()
-
-                    # get a list of all sprites that are under the mouse cursor
-                    clicked_sprites = [s for s in self.pawns_rect if s.collidepoint(pos)]
-
-                    if clicked_sprites:
-                        clicked_token = self.get_token_coor(
-                            clicked_sprites[0].x, clicked_sprites[0].y
-                        )
-                        if self.matrix[clicked_token[0], clicked_token[1]] == self.player_index:
-                            if clicked_token == last_selected_token:
-                                last_selected_token = []
-                                player_valid_moves = []
-                            else:
-                                player_valid_moves = self.get_valid_moves(clicked_token)
-                                last_selected_token = clicked_token
-                            self.screen.fill(pygame.Color(Colors.BLACK))
-                            self.add_selected_effect(player_valid_moves, last_selected_token)
-                        elif clicked_token in player_valid_moves:
-                            self.move(last_selected_token, clicked_token)
-                            self.check_winner()
-                            last_selected_token = []
-                            player_valid_moves = []
-                            self.screen.fill(pygame.Color(Colors.BLACK))
-                            self.player_index = (self.player_index + 1) % (self.number_of_players + 1)
-                            if self.player_index == 0:
-                                self.player_index += 1
-                            self.add_selected_effect()
-
-                        game_on = not self.check_winner()
             pygame.display.update()
+            time.tick(60 * 250) 
 
-        self.write_text(
-            "We have a winner!",
-            num_columns * CELL_SIZE - 370,
-            num_rows * CELL_SIZE + 30,
-            50,
-            Colors.WHITE,
-        )
-        pygame.display.update()
-        time.tick(60 * 250) 
+        except Exception as e:
+            print("An error occurred: ", e)
+        finally:
+            pygame.quit()
 
     def __del__(self):
         print("Game ended.")
@@ -331,14 +308,6 @@ if __name__ == "__main__":
     @app.route("/get_player_pawns/<int:player_index>", methods=["GET"])
     def get_player_pawns(player_index):
         return {"pawns": game.get_player_pawns(player_index)}
-    
-    @app.route("/get_all_possible_player_moves/<int:player_index>", methods=["GET"])
-    def get_all_possible_player_moves(player_index):
-        return {"moves": game.get_all_possible_player_moves(player_index)}
-    
-    @app.route("/get_moves/<int:pos_x>/<int:pos_y>", methods=["GET"])
-    def get_moves(pos_x, pos_y):
-        return {"moves": game.get_valid_moves([pos_x, pos_y])}
     
     @app.route("/is_ai_turn/<int:player_index>", methods=["GET"])
     def is_ai_turn(player_index):
