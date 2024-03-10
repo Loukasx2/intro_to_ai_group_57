@@ -29,5 +29,27 @@ class UsefulFunctions:
                         if [x3, y3] not in moves_array:
                             if -1 < x3 < 17 and -1 < y3 < 25:
                                 if matrix[x3][y3] > 0:
-                                    self.check_path(self.move_index[j], x3, y3, moves_array)
+                                    self.check_path(matrix, self.move_index[j], x3, y3, moves_array)
         return moves_array
+    
+    def move(self, matrix, pos, target):
+        # if self.player_index != matrix[pos[0]][pos[1]]:
+        #     print(f"Invalid move. Not your turn. Player {self.player_index} is playing and you are trying to move player {matrix[pos[0]][pos[1]]}'s pawn.")
+        #     return False
+        valid_moves = self.get_valid_moves(matrix, pos)
+        if target not in valid_moves:
+            print("Invalid move. Target not in valid moves.")
+            print(f"Tried to move from {pos} to {target}. Valid moves are {valid_moves}")
+            return False
+        matrix[target[0]][target[1]] = matrix[pos[0]][pos[1]]
+        matrix[pos[0]][pos[1]] = 0
+
+        return matrix
+    
+    def get_pawns(self, matrix, player_index):
+        pawns = []
+        for i in range(17):
+            for j in range(25):
+                if matrix[i][j] == player_index:
+                    pawns.append([i, j])
+        return pawns
