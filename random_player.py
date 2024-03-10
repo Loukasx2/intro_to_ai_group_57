@@ -29,4 +29,4 @@ while True:
         # wait for 1 second
     except requests.exceptions.RequestException as e:
         print(e)
-    time.sleep(0.25)
+    # time.sleep(0.25)
