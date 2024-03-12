@@ -274,8 +274,6 @@ class GameEngine():
 
         except Exception as e:
             print("An error occurred: ", e)
-        finally:
-            pygame.quit()
 
     def __del__(self):
         print("Game ended.")
