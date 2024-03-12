@@ -212,7 +212,7 @@ class GameEngine():
                 )
 
                 if self.player_index in self.ai_player_numbers:
-                    event = pygame.event.wait()
+                    event = pygame.event.wait(5)
 
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -223,7 +223,7 @@ class GameEngine():
                     game_on = not self.check_winner()
                 else:
                     pygame.display.update()
-                    event = pygame.event.wait()
+                    event = pygame.event.wait(5)
 
                     if event.type == pygame.QUIT:
                         pygame.quit()

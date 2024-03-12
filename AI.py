@@ -66,6 +66,7 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
 while True:
     response = requests.get(f'http://localhost:5000/is_ai_turn/{player_index}')
     if response.json().get('is_ai_turn'):
+        start_time = time.time()
         board = requests.get(f'http://localhost:5000/get_board').json()["board"]
         best_move = []
         best_eval = -100000
@@ -82,6 +83,9 @@ while True:
                     best_move = move
                     best_pawn = pawn
 
+        finish_time = time.time()
+
+        print(f"Moving: {best_pawn} -> {best_move}, Time taken: {finish_time - start_time}")
         requests.post(f'http://localhost:5000/move/{best_pawn[0]}/{best_pawn[1]}/{best_move[0]}/{best_move[1]}')
         
 
