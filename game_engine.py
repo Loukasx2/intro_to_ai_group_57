@@ -15,6 +15,9 @@ num_columns = 25
 num_rows = 25
 CELL_SIZE = 20
 
+BOARD_SIZE_X = 9
+BOARD_SIZE_Y = 9
+
 # Neon colors:
 class Colors:
     # Modified tones of existing colors
@@ -32,14 +35,14 @@ class GameEngine():
     def __init__(self, number_of_players):
         pygame.init()
         self.useful_functions = UsefulFunctions()
-        self.matrix = numpy.ones((17, 25)) * -1
+        self.matrix = numpy.ones((BOARD_SIZE_X, BOARD_SIZE_Y)) * -1
         self.number_of_players = number_of_players
         self.ai_player_numbers = [2, 3, 4, 5, 6]
 
         if number_of_players == 2:
             self.players_list = [
-                [[0, 12], [1, 11], [1, 13], [2, 10], [2, 12], [2, 14], [3, 9], [3, 11], [3, 13], [3, 15]],
-                [[16, 12], [15, 11], [15, 13], [14, 10], [14, 12], [14, 14], [13, 9], [13, 11], [13, 13], [13, 15]]
+                [[0, 4], [1, 3], [1, 5], [2, 2], [2, 4], [2, 6]],
+                [[8, 4], [7, 3], [7, 5], [6, 2], [6, 4], [6, 6]]                 
             ]
         elif number_of_players == 3:
             self.players_list = [
@@ -68,20 +71,11 @@ class GameEngine():
             sys.exit(1)
 
         self.move_index = [[-1, -1], [-1, 1], [0, 2], [1, 1], [1, -1], [0, -2]]
-        matrix_index = [1, 2, 3, 4, 13, 12, 11, 10, 9]
-        for i in range(9):
-            j = 12
-            first_time = True
-            while matrix_index[i] > 0:
-                if (i % 2 == 0) and first_time:
-                    first_time = False
-                    self.matrix[i][j] = self.matrix[16 - i][j] = 0
-                    matrix_index[i] -= 1
-                else:
-                    j -= 1
-                    self.matrix[i][j] = self.matrix[i][24 - j] = self.matrix[16 - i][j] = self.matrix[16 - i][24 - j] = 0
-                    matrix_index[i] -= 2
-                j -= 1
+
+        self.free_spaces = [[3,1], [3,3], [3,5], [3,7], [4,0], [4,2], [4,4], [4,6], [4,8], [5,1], [5,3], [5,5], [5,7]]
+
+        for free_space in self.free_spaces:
+            self.matrix[free_space[0]][free_space[1]] = 0
 
         index = 1
         for player in self.players_list[:number_of_players]:
@@ -91,8 +85,8 @@ class GameEngine():
 
     def draw_pawns(self,):
         colors = [Colors.GREY, Colors.RED, Colors.YELLOW, Colors.ORANGE, Colors.GREEN, Colors.PURPLE, Colors.BLUE]
-        for i in range(0, 17):
-            for j in range(0, 25):
+        for i in range(0, BOARD_SIZE_X):
+            for j in range(0, BOARD_SIZE_Y):
                 if self.matrix[i][j] >= 0:
                     if self.matrix[i][j] == 0:
                         circle_center = (j * CELL_SIZE + CELL_SIZE/2, i * CELL_SIZE * y_scaling_factor + CELL_SIZE/2)
@@ -135,8 +129,8 @@ class GameEngine():
     def add_selected_effect(self,moves=[], clicked_token=None):
         colors = [Colors.GREY, Colors.RED, Colors.YELLOW, Colors.ORANGE, Colors.GREEN, Colors.PURPLE, Colors.BLUE]
         moves.append(clicked_token)
-        for i in range(0, 17):
-            for j in range(0, 25):
+        for i in range(0, BOARD_SIZE_X):
+            for j in range(0, BOARD_SIZE_Y):
                 if self.matrix[i][j] >= 0:
                     if self.matrix[i][j] == 0:
                         circle_center = (int(j * CELL_SIZE + CELL_SIZE/2), int(i * CELL_SIZE * y_scaling_factor + CELL_SIZE/2))
@@ -176,8 +170,8 @@ class GameEngine():
     
     def get_player_pawns(self,player_index):
         pawns = []
-        for i in range(17):
-            for j in range(25):
+        for i in range(BOARD_SIZE_X):
+            for j in range(BOARD_SIZE_Y):
                 if self.matrix[i][j] == player_index:
                     pawns.append([i, j])
         return pawns
