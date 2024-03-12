@@ -3,7 +3,12 @@ class UsefulFunctions:
     def __init__(self):
         self.move_index = [[-1, -1], [-1, 1], [0, 2], [1, 1], [1, -1], [0, -2]]
     
+    def set_move_index(self, move_index):
+        self.move_index = move_index
+
+
     def get_valid_moves(self, matrix, coor):
+        """Returns the valid moves for a pawn in the given coordinates."""
         valid_index = []
         for i in range(len(self.move_index)):
 
@@ -17,6 +22,7 @@ class UsefulFunctions:
         return valid_index
 
     def check_path(self, matrix, path_coor, x, y, moves_array):
+        """Returns the valid moves for a pawn in the given coordinates. Recursive function."""
         x2 = x + path_coor[0]
         y2 = y + path_coor[1]
         if [x2, y2] not in moves_array:
