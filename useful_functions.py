@@ -2,6 +2,9 @@
 class UsefulFunctions:
     def __init__(self):
         self.move_index = [[-1, -1], [-1, 1], [0, 2], [1, 1], [1, -1], [0, -2]]
+
+    def set_move_index(self, move_index):
+        self.move_index = move_index
     
     def get_valid_moves(self, matrix, coor):
         valid_index = []

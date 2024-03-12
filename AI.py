@@ -7,11 +7,13 @@ from useful_functions import *
 # get the player index from command line arguments
 player_index = int(sys.argv[1])
 
+useful_functions = UsefulFunctions()
 if player_index == 1:
     goals = [[16, 12], [15, 11], [15, 13], [14, 10], [14, 12], [14, 14], [13, 9], [13, 11], [13, 13], [13, 15]]
+    useful_functions.set_move_index([[1, -1], [0, 2], [1, 1], [0, -2]])
 else:
     goals = [[0, 12], [1, 11], [1, 13], [2, 10], [2, 12], [2, 14], [3, 9], [3, 11], [3, 13], [3, 15]]
-useful_functions = UsefulFunctions()
+    useful_functions.set_move_index([[-1, -1], [-1, 1], [0, -2], [0, 2]])
 
 def evaluate(board, player_index):
     score = 0
@@ -19,16 +21,33 @@ def evaluate(board, player_index):
         if board[goal[0]][goal[1]] == player_index:
             score += 1
 
-    #distnce to goal[4]
+    if score == len(goals):
+        return 10000
+
     middle_goal = goals[4]
+            
     for i in range(17):
         for j in range(25):
             if board[i][j] == player_index:
                 score -= abs(i - middle_goal[0]) + abs(j - middle_goal[1])
     return score
 
+def is_game_over(board):
+    number_of_occupied_positions = 0
+    number_of_self_occupied_positions = 0
+
+    for goal in goals:
+        if board[goal[0]][goal[1]] > 0:
+            number_of_occupied_positions += 1
+            if board[goal[0]][goal[1]] == 2:
+                number_of_self_occupied_positions += 1
+
+    if number_of_occupied_positions == len(goals) and number_of_self_occupied_positions != len(goals):
+        return True
+
 def minimax(board, depth, is_maximizing, alpha, beta, player_index):
-    board = board.copy()
+    if is_game_over(board):
+        return evaluate(copy.deepcopy(board), player_index)
 
     if depth == 0:
         return evaluate(copy.deepcopy(board), player_index)
@@ -85,7 +104,7 @@ while True:
 
         finish_time = time.time()
 
-        print(f"Moving: {best_pawn} -> {best_move}, Time taken: {finish_time - start_time}")
+        print(f"Moving: {best_pawn} -> {best_move}, Time taken: {finish_time - start_time}, Eval: {best_eval}")
         requests.post(f'http://localhost:5000/move/{best_pawn[0]}/{best_pawn[1]}/{best_move[0]}/{best_move[1]}')
         
 
