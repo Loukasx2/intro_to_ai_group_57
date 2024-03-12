@@ -10,11 +10,11 @@ player_index = int(sys.argv[1])
 useful_functions = UsefulFunctions()
 reached_goals = []
 if player_index == 1:
-    goals = [[16, 12], [15, 11], [15, 13], [14, 10], [14, 12], [14, 14], [13, 9], [13, 11], [13, 13], [13, 15]]
+    goals = [[8, 4], [7, 3], [7, 5], [6, 2], [6, 4], [6, 6]]
     useful_functions.set_move_index([[1, -1], [0, 2], [1, 1], [0, -2]])
     enemy_player_index = 2
 else:
-    goals = [[0, 12], [1, 11], [1, 13], [2, 10], [2, 12], [2, 14], [3, 9], [3, 11], [3, 13], [3, 15]]
+    goals = [[0, 4], [1, 3], [1, 5], [2, 2], [2, 4], [2, 6]]
     useful_functions.set_move_index([[-1, -1], [-1, 1], [0, -2], [0, 2]])
     enemy_player_index = 1
 
@@ -37,8 +37,8 @@ def evaluate(board, player_index):
             middle_goal = goal
             break
             
-    for i in range(17):
-        for j in range(25):
+    for i in range(BOARD_SIZE_X):
+        for j in range(BOARD_SIZE_Y):
             if board[i][j] == player_index:
                 score -= abs(i - middle_goal[0]) + abs(j - middle_goal[1])
     return score
