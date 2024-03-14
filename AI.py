@@ -24,6 +24,11 @@ reached_goals = []
 furthest_goal_index = 0
 furthest_goal = goals[0]
 
+row_filled = 0
+row1 = [goals[0]]
+row2 = goals[1:3]
+row3 = goals[3:6]
+
 def prune_moves_that_makes_us_be_further_away(pawn, moves):
     return moves
 
@@ -62,10 +67,10 @@ def is_game_over(board):
     number_of_self_occupied_positions = 0
 
     for goal in goals:
-        if board[goal[0]][goal[1]] > 0:
+        if board[goal[0]][goal[1]] == player_index:
             number_of_occupied_positions += 1
-            if board[goal[0]][goal[1]] == enemy_player_index:
-                number_of_self_occupied_positions += 1
+        if board[goal[0]][goal[1]] == enemy_player_index:
+            number_of_self_occupied_positions += 1
 
     if (number_of_occupied_positions + number_of_self_occupied_positions) == len(goals):
         return True
@@ -111,6 +116,29 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
                 #     break
         return min_eval
 
+
+
+def check_reached_goals(board):
+    global row_filled
+    # Cycle through the board and check if the goals have been reached
+    for goal in goals:
+        if board[goal[0]][goal[1]] == player_index:
+            if row_filled == 0 and goal in row1:
+                row_filled += 1
+                reached_goals.append(goal)
+            elif row_filled == 1 and goal in row2:
+                # Pop the element from the list that corresponds to the goal reached
+                row2.pop(row2.index(goal))
+                reached_goals.append(goal)
+                if not row2: 
+                    row_filled += 1
+            elif row_filled == 2 and goal in row3:
+                # Pop the element from the list that corresponds to the goal reached
+                row3.pop(row3.index(goal))
+                reached_goals.append(goal)
+                if not row3: 
+                    row_filled += 1
+
 while True:
     response = requests.get(f'http://localhost:5000/is_ai_turn/{player_index}')
     if response.json().get('is_ai_turn'):
@@ -147,11 +175,15 @@ while True:
 
         print(f"Moving: {best_pawn} -> {best_move}, Time taken: {finish_time - start_time}, Eval: {best_eval}")
         requests.post(f'http://localhost:5000/move/{best_pawn[0]}/{best_pawn[1]}/{best_move[0]}/{best_move[1]}')
-        if best_move in goals:
-                if best_move not in reached_goals and best_move == furthest_goal:
-                    reached_goals.append(best_move)
-                    furthest_goal_index += 1
-                    furthest_goal = goals[furthest_goal_index]
-    
+        if best_move in goals and best_move not in reached_goals:
+            board = requests.get(f'http://localhost:5000/get_board').json()["board"]
+            check_reached_goals(board)
 
     time.sleep(0.25)
+
+
+
+    
+    
+
+
