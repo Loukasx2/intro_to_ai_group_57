@@ -64,10 +64,10 @@ def is_game_over(board):
     for goal in goals:
         if board[goal[0]][goal[1]] > 0:
             number_of_occupied_positions += 1
-            if board[goal[0]][goal[1]] == 2:
+            if board[goal[0]][goal[1]] == enemy_player_index:
                 number_of_self_occupied_positions += 1
 
-    if number_of_occupied_positions == len(goals) and number_of_self_occupied_positions != len(goals):
+    if (number_of_occupied_positions + number_of_self_occupied_positions) == len(goals):
         return True
 
 def minimax(board, depth, is_maximizing, alpha, beta, player_index):
@@ -84,15 +84,15 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
                 valid_moves = useful_functions.get_valid_moves(copy.deepcopy(board), pawn)
                 valid_moves = prune_moves_that_makes_us_be_further_away(pawn, valid_moves)
                 for move in valid_moves:
-                    new_board = useful_functions.move(copy.deepcopy(board), pawn, move)
+                    new_board = useful_functions.move(copy.deepcopy(board), pawn, move) 
                     if new_board == False:
                         print("[[MAX]] Invalid move")
                         sys.exit()
                     eval = minimax(copy.deepcopy(new_board), depth - 1, False, alpha, beta, player_index)
                     max_eval = max(max_eval, eval)
-                    alpha = max(alpha, eval)
-                    if beta <= alpha:
-                        break
+                    # alpha = max(alpha, eval)
+                    # if beta <= alpha:
+                    #     break
         return max_eval
     else:
         min_eval = 100000
@@ -106,9 +106,9 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
                     sys.exit()
                 eval = minimax(copy.deepcopy(new_board), depth - 1, True, alpha, beta, player_index)
                 min_eval = min(min_eval, eval)
-                beta = min(beta, eval)
-                if beta <= alpha:
-                    break
+                # beta = min(beta, eval)
+                # if beta <= alpha:
+                #     break
         return min_eval
 
 while True:
@@ -131,7 +131,13 @@ while True:
                     if new_board == False:
                         print("[MAIN] Invalid move")
                         sys.exit()
-                    eval = minimax(copy.deepcopy(new_board), 2, False, -100000, 100000, player_index)
+                    if is_game_over(new_board):
+                        best_eval = eval
+                        best_move = move
+                        best_pawn = pawn
+                        break
+                    else:
+                        eval = minimax(copy.deepcopy(new_board), 2, False, -100000, 100000, player_index)
                     if eval > best_eval:
                         best_eval = eval
                         best_move = move
