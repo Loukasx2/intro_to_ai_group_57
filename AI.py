@@ -24,7 +24,7 @@ reached_goals = []
 furthest_goal_index = 0
 furthest_goal = goals[furthest_goal_index]
 
-def evaluate(board, player_index):
+def evaluate(board, player_index, depth):
     score = 0
     goals_available = copy.deepcopy(goals)
     for goal in goals:
@@ -33,7 +33,7 @@ def evaluate(board, player_index):
             goals_available.remove(goal)
 
     if score == len(goals):
-        return 10000
+        return 10000 * (depth + 1)
 
     for i in range(BOARD_SIZE_X):
         for j in range(BOARD_SIZE_Y):
@@ -62,10 +62,11 @@ def is_game_over(board):
 
 def minimax(board, depth, is_maximizing, alpha, beta, player_index):
     if is_game_over(board):
-        return evaluate(copy.deepcopy(board), player_index)
+        print("Game over!")
+        return 10000 * (depth + 1)
 
     if depth == 0:
-        return evaluate(copy.deepcopy(board), player_index)
+        return evaluate(copy.deepcopy(board), player_index, depth)
     
     if is_maximizing:
         max_eval = -100000
