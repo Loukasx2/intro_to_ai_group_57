@@ -47,23 +47,38 @@ def evaluate(board, player_index, depth):
 
     return score
 
-def is_game_over(board):
+def did_i_win(board):
     number_of_occupied_positions = 0
     number_of_self_occupied_positions = 0
 
     for goal in goals:
         if board[goal[0]][goal[1]] > 0:
             number_of_occupied_positions += 1
-            if board[goal[0]][goal[1]] == 2:
+            if board[goal[0]][goal[1]] == enemy_player_index:
                 number_of_self_occupied_positions += 1
 
     if number_of_occupied_positions == len(goals) and number_of_self_occupied_positions != len(goals):
         return True
+    
+def did_enemy_win(board):
+    number_of_occupied_positions = 0
+    number_of_self_occupied_positions = 0
+
+    for goal in enemy_goals:
+        if board[goal[0]][goal[1]] > 0:
+            number_of_occupied_positions += 1
+            if board[goal[0]][goal[1]] == player_index:
+                number_of_self_occupied_positions += 1
+
+    if number_of_occupied_positions == len(enemy_goals) and number_of_self_occupied_positions != len(enemy_goals):
+        return True
 
 def minimax(board, depth, is_maximizing, alpha, beta, player_index):
-    if is_game_over(board):
-        print("Game over!")
+    if did_i_win(board):
         return 10000 * (depth + 1)
+    
+    if did_enemy_win(board):
+        return -10000 * (depth + 1)
 
     if depth == 0:
         return evaluate(copy.deepcopy(board), player_index, depth)
@@ -133,6 +148,6 @@ while True:
                         furthest_goal_index += 1
                         furthest_goal = goals[furthest_goal_index]
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
     time.sleep(0.25)

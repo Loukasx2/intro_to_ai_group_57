@@ -104,6 +104,9 @@ class GameEngine():
         if self.player_index != self.matrix[pos[0]][pos[1]]:
             print(f"Invalid move. Not your turn. Player {self.player_index} is playing and you are trying to move player {self.matrix[pos[0]][pos[1]]}'s pawn.")
             return False
+        if ai_move and self.player_index not in self.ai_player_numbers:
+            print(f"Not AI's turn. Player {self.player_index} is playing.")
+            return False
         valid_moves = self.useful_functions.get_valid_moves(self.matrix, pos)
         if target not in valid_moves:
             print("Invalid move. Target not in valid moves.")
@@ -206,7 +209,7 @@ class GameEngine():
                 )
 
                 if self.player_index in self.ai_player_numbers:
-                    event = pygame.event.wait(5)
+                    event = pygame.event.wait()
 
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -214,10 +217,12 @@ class GameEngine():
 
                     self.screen.fill(pygame.Color(Colors.BLACK))
                     self.add_selected_effect()
+                    self.draw_pawns()
                     game_on = not self.check_winner()
+                    pygame.display.update()
                 else:
                     pygame.display.update()
-                    event = pygame.event.wait(5)
+                    event = pygame.event.wait()
 
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -264,7 +269,8 @@ class GameEngine():
                 Colors.WHITE,
             )
             pygame.display.update()
-            time.tick(60 * 250) 
+            pygame.time.wait(3000)
+            pygame.quit()
 
         except Exception as e:
             print("An error occurred: ", e)
