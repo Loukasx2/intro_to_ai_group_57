@@ -22,10 +22,7 @@ else:
 
 reached_goals = []
 furthest_goal_index = 0
-furthest_goal = goals[0]
-
-def prune_moves_that_makes_us_be_further_away(pawn, moves):
-    return moves
+furthest_goal = goals[furthest_goal_index]
 
 def evaluate(board, player_index):
     score = 0
@@ -41,13 +38,6 @@ def evaluate(board, player_index):
     for i in range(BOARD_SIZE_X):
         for j in range(BOARD_SIZE_Y):
             if board[i][j] == player_index:
-                # # find closes avaialble goal
-                # closest_distance = None
-                # for goal in goals_available:
-                #     distance_to_goal = abs(i - goal[0]) + abs(j - goal[1])
-                #     if closest_distance == None or distance_to_goal < closest_distance:
-                #         closest_distance = distance_to_goal
-                # score -= closest_distance
                 score -= abs(i - furthest_goal[0]) + abs(j - furthest_goal[1])
 
     # penalize pawns in the enemy goals
@@ -82,7 +72,6 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
         for pawn in useful_functions.get_pawns(copy.deepcopy(board), player_index):   
             if pawn not in reached_goals:             
                 valid_moves = useful_functions.get_valid_moves(copy.deepcopy(board), pawn)
-                valid_moves = prune_moves_that_makes_us_be_further_away(pawn, valid_moves)
                 for move in valid_moves:
                     new_board = useful_functions.move(copy.deepcopy(board), pawn, move)
                     if new_board == False:
@@ -98,7 +87,6 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
         min_eval = 100000
         for pawn in useful_functions.get_pawns(copy.deepcopy(board), enemy_player_index):
             valid_moves = useful_functions.get_valid_moves(copy.deepcopy(board), pawn)
-            valid_moves = prune_moves_that_makes_us_be_further_away(pawn, valid_moves)
             for move in valid_moves:
                 new_board = useful_functions.move(copy.deepcopy(board), pawn, move)
                 if new_board == False:
@@ -112,40 +100,38 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
         return min_eval
 
 while True:
-    response = requests.get(f'http://localhost:5000/is_ai_turn/{player_index}')
-    if response.json().get('is_ai_turn'):
-        start_time = time.time()
-        board = requests.get(f'http://localhost:5000/get_board').json()["board"]
-        best_move = []
-        best_eval = -100000
-        best_pawn = []
-        for pawn in useful_functions.get_pawns(copy.deepcopy(board), player_index):
+    try:
+        response = requests.get(f'http://localhost:5000/is_ai_turn/{player_index}')
+        if response.json().get('is_ai_turn'):
+            start_time = time.time()
+            board = requests.get(f'http://localhost:5000/get_board').json()["board"]
+            best_move = []
+            best_eval = -100000
+            best_pawn = []
+            for pawn in useful_functions.get_pawns(copy.deepcopy(board), player_index):
+                if pawn not in reached_goals:
+                    valid_moves = useful_functions.get_valid_moves(copy.deepcopy(board), pawn)
+                    for move in valid_moves:
+                        new_board = useful_functions.move(copy.deepcopy(board), pawn, move)
+                        if new_board == False:
+                            print("[MAIN] Invalid move")
+                            sys.exit()
+                        eval = minimax(copy.deepcopy(new_board), 2, False, -100000, 100000, player_index)
+                        if eval > best_eval:
+                            best_eval = eval
+                            best_move = move
+                            best_pawn = pawn
 
-            # check reached goals and add them to the list
-            if pawn not in reached_goals:
-                print(f"Reached goal: {pawn}")
-                valid_moves = useful_functions.get_valid_moves(copy.deepcopy(board), pawn)
-                valid_moves = prune_moves_that_makes_us_be_further_away(pawn, valid_moves)
-                for move in valid_moves:
-                    new_board = useful_functions.move(copy.deepcopy(board), pawn, move)
-                    if new_board == False:
-                        print("[MAIN] Invalid move")
-                        sys.exit()
-                    eval = minimax(copy.deepcopy(new_board), 2, False, -100000, 100000, player_index)
-                    if eval > best_eval:
-                        best_eval = eval
-                        best_move = move
-                        best_pawn = pawn
+            finish_time = time.time()
 
-        finish_time = time.time()
-
-        print(f"Moving: {best_pawn} -> {best_move}, Time taken: {finish_time - start_time}, Eval: {best_eval}")
-        requests.post(f'http://localhost:5000/move/{best_pawn[0]}/{best_pawn[1]}/{best_move[0]}/{best_move[1]}')
-        if best_move in goals:
-                if best_move not in reached_goals and best_move == furthest_goal:
-                    reached_goals.append(best_move)
-                    furthest_goal_index += 1
-                    furthest_goal = goals[furthest_goal_index]
-    
+            print(f"Moving: {best_pawn} -> {best_move}, Time taken: {finish_time - start_time}, Eval: {best_eval}")
+            requests.post(f'http://localhost:5000/move/{best_pawn[0]}/{best_pawn[1]}/{best_move[0]}/{best_move[1]}')
+            if best_move in goals:
+                    if best_move not in reached_goals and best_move == furthest_goal:
+                        reached_goals.append(best_move)
+                        furthest_goal_index += 1
+                        furthest_goal = goals[furthest_goal_index]
+    except Exception as e:
+        print(f"Error: {e}")
 
     time.sleep(0.25)
