@@ -1,8 +1,13 @@
-BOARD_SIZE_X = 11
-BOARD_SIZE_Y = BOARD_SIZE_X
-NUMBER_OF_ROWS_WITH_PAWNS = 3
-
+import yaml
 import random
+
+# Load config file
+with open("config.yaml", "r") as yamlfile:
+    cfg = yaml.safe_load(yamlfile)
+
+BOARD_SIZE_X = cfg["board_size"]
+BOARD_SIZE_Y = BOARD_SIZE_X
+NUMBER_OF_ROWS_WITH_PAWNS = cfg["number_of_rows_with_pawns"]
 
 class UsefulFunctions:
     def __init__(self):

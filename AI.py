@@ -2,7 +2,14 @@ import requests
 import time
 import sys
 import copy
+import yaml
 from useful_functions import *
+
+# load config file
+with open("config.yaml", "r") as yamlfile:
+    cfg = yaml.safe_load(yamlfile)
+
+DEPTH = cfg["depth"]
 
 # get the player index from command line arguments
 player_index = int(sys.argv[1])
@@ -24,24 +31,29 @@ furthest_goal = goals[furthest_goal_index]
 
 def evaluate(board, player_index, depth):
     score = 0
-    goals_available = copy.deepcopy(goals)
+
+    score_for_pawns_in_goals = 0
     for goal in goals:
         if board[goal[0]][goal[1]] == player_index:
-            score += 1
-            goals_available.remove(goal)
+            score_for_pawns_in_goals += 1
 
     if score == len(goals):
         return 10000 * (depth + 1)
 
+    score_for_distance_to_goal = 0
     for i in range(BOARD_SIZE_X):
         for j in range(BOARD_SIZE_Y):
             if board[i][j] == player_index:
-                score -= abs(i - furthest_goal[0]) + abs(j - furthest_goal[1])
+                score_for_distance_to_goal -= abs(i - furthest_goal[0]) + abs(j - furthest_goal[1])
 
-    # penalize pawns in the enemy goals
+    score_for_pawns_on_own_goal = 0
     for enemy_goal in enemy_goals:
         if board[enemy_goal[0]][enemy_goal[1]] == player_index:
-            score -= 10
+            score_for_pawns_on_own_goal -= 10
+
+    # print(f"Score: {score_for_pawns_in_goals} + {score_for_distance_to_goal} + {score_for_pawns_on_own_goal}")
+
+    score = score_for_pawns_in_goals + score_for_distance_to_goal + score_for_pawns_on_own_goal
 
     return score
 
@@ -130,7 +142,7 @@ while True:
                         if new_board == False:
                             print("[MAIN] Invalid move")
                             sys.exit()
-                        eval = minimax(copy.deepcopy(new_board), 2, False, -100000, 100000, player_index)
+                        eval = minimax(copy.deepcopy(new_board), DEPTH, False, -100000, 100000, player_index)
                         if eval > best_eval:
                             best_eval = eval
                             best_move = move
