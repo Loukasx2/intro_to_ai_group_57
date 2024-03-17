@@ -10,14 +10,12 @@ player_index = int(sys.argv[1])
 useful_functions = UsefulFunctions()
 reached_goals = []
 if player_index == 1:
-    goals = [[8, 4], [7, 3], [7, 5], [6, 2], [6, 4], [6, 6]]
-    enemy_goals = [[0, 4], [1, 3], [1, 5], [2, 2], [2, 4], [2, 6]]
     # useful_functions.set_move_index([[1, -1], [0, 2], [1, 1], [0, -2]])
+    enemy_goals, goals = useful_functions.get_starting_positions()
     enemy_player_index = 2
 else:
-    goals = [[0, 4], [1, 3], [1, 5], [2, 2], [2, 4], [2, 6]]
-    enemy_goals = [[8, 4], [7, 3], [7, 5], [6, 2], [6, 4], [6, 6]]
     # useful_functions.set_move_index([[-1, -1], [-1, 1], [0, -2], [0, 2]])
+    goals, enemy_goals = useful_functions.get_starting_positions()
     enemy_player_index = 1
 
 reached_goals = []

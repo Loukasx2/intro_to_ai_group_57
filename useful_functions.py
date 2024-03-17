@@ -1,5 +1,8 @@
-BOARD_SIZE_X = 9
-BOARD_SIZE_Y = 9
+BOARD_SIZE_X = 11
+BOARD_SIZE_Y = BOARD_SIZE_X
+NUMBER_OF_ROWS_WITH_PAWNS = 3
+
+import random
 
 class UsefulFunctions:
     def __init__(self):
@@ -16,6 +19,7 @@ class UsefulFunctions:
                     valid_index.append([x, y])
                 elif matrix[x][y] != -1:
                     valid_index = self.check_path(matrix, self.move_index[i], x, y, valid_index)
+        random.shuffle(valid_index)
         return valid_index
 
     def check_path(self, matrix, path_coor, x, y, moves_array):
@@ -54,4 +58,21 @@ class UsefulFunctions:
             for j in range(BOARD_SIZE_Y):
                 if matrix[i][j] == player_index:
                     pawns.append([i, j])
+        random.shuffle(pawns)
         return pawns
+    
+    def get_starting_positions(self):
+        i = 1
+        player_1 = []
+        player_2 = []
+        middle_column = int(BOARD_SIZE_X / 2)
+        player_1.append([0, middle_column])
+        player_2.append([BOARD_SIZE_X - 1, middle_column])
+        for j in range(1, NUMBER_OF_ROWS_WITH_PAWNS):
+            for k in range(middle_column - i, middle_column + i + 1, 2):
+                player_1.append([j, k])
+                player_2.append([BOARD_SIZE_X - 1 - j, k])
+
+            i += 1
+
+        return player_1, player_2

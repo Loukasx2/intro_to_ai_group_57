@@ -15,9 +15,6 @@ num_columns = 25
 num_rows = 25
 CELL_SIZE = 20
 
-BOARD_SIZE_X = 9
-BOARD_SIZE_Y = 9
-
 # Neon colors:
 class Colors:
     # Modified tones of existing colors
@@ -37,12 +34,17 @@ class GameEngine():
         self.useful_functions = UsefulFunctions()
         self.matrix = numpy.ones((BOARD_SIZE_X, BOARD_SIZE_Y)) * -1
         self.number_of_players = number_of_players
-        self.ai_player_numbers = [2, 3, 4, 5, 6]
+        self.ai_player_numbers = [1, 2, 3, 4, 5, 6]
+
+        self.move_sound = pygame.mixer.Sound("sounds/move-self.mp3")
+        self.end_sound = pygame.mixer.Sound("sounds/game-end.mp3")
 
         if number_of_players == 2:
+            player_1, player_2 = self.useful_functions.get_starting_positions()
+
             self.players_list = [
-                [[0, 4], [1, 3], [1, 5], [2, 2], [2, 4], [2, 6]],
-                [[8, 4], [7, 3], [7, 5], [6, 2], [6, 4], [6, 6]]                 
+                player_1,
+                player_2
             ]
         elif number_of_players == 3:
             self.players_list = [
@@ -72,16 +74,33 @@ class GameEngine():
 
         self.move_index = [[-1, -1], [-1, 1], [0, 2], [1, 1], [1, -1], [0, -2]]
 
-        self.free_spaces = [[3,1], [3,3], [3,5], [3,7], [4,0], [4,2], [4,4], [4,6], [4,8], [5,1], [5,3], [5,5], [5,7]]
-
-        for free_space in self.free_spaces:
-            self.matrix[free_space[0]][free_space[1]] = 0
-
         index = 1
         for player in self.players_list[:number_of_players]:
             for i in range(len(player)):
                 self.matrix[player[i][0]][player[i][1]] = index
             index += 1
+
+        starting_row = NUMBER_OF_ROWS_WITH_PAWNS
+        finishing_row = BOARD_SIZE_X - NUMBER_OF_ROWS_WITH_PAWNS
+        middle_column = int(BOARD_SIZE_Y / 2)
+        starting_number_of_free_positions = NUMBER_OF_ROWS_WITH_PAWNS + 1
+        for i in range(starting_row, finishing_row):
+            if i % 2 != 0:
+                displacement = 1
+                for j in range(int(starting_number_of_free_positions/2)):
+                    self.matrix[i][middle_column - displacement] = 0
+                    self.matrix[i][middle_column + displacement] = 0
+                    displacement += 2
+            else:
+                displacement = 0
+                for j in range(int(starting_number_of_free_positions/2+1)):
+                    self.matrix[i][middle_column - displacement] = 0
+                    self.matrix[i][middle_column + displacement] = 0
+                    displacement += 2
+            if i >= middle_column:
+                starting_number_of_free_positions -= 1
+            else:
+                starting_number_of_free_positions += 1
 
     def draw_pawns(self,):
         colors = [Colors.GREY, Colors.RED, Colors.YELLOW, Colors.ORANGE, Colors.GREEN, Colors.PURPLE, Colors.BLUE]
@@ -91,7 +110,7 @@ class GameEngine():
                     if self.matrix[i][j] == 0:
                         circle_center = (j * CELL_SIZE + CELL_SIZE/2, i * CELL_SIZE * y_scaling_factor + CELL_SIZE/2)
                         circle_radius = CELL_SIZE/4
-                    else:
+                    else:   
                         circle_center = (j * CELL_SIZE + CELL_SIZE/2, i * CELL_SIZE * y_scaling_factor + CELL_SIZE/2)
                         circle_radius = CELL_SIZE/2
                     self.pawns_rect.append(
@@ -121,6 +140,7 @@ class GameEngine():
             # post event to update the game
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, {}))
 
+        self.move_sound.play()
         return True
 
     def get_token_coor(self,x, y):
@@ -268,6 +288,8 @@ class GameEngine():
                 50,
                 Colors.WHITE,
             )
+            self.player_index = -1
+            self.end_sound.play()
             pygame.display.update()
             pygame.time.wait(3000)
             pygame.quit()
