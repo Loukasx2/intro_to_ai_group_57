@@ -34,7 +34,15 @@ class GameEngine():
         self.useful_functions = UsefulFunctions()
         self.matrix = numpy.ones((BOARD_SIZE_X, BOARD_SIZE_Y)) * -1
         self.number_of_players = number_of_players
-        self.ai_player_numbers = [1, 2, 3, 4, 5, 6]
+
+        # load yaml
+        with open("config.yaml", "r") as yamlfile:
+            cfg = yaml.safe_load(yamlfile)
+        self.ai_player_numbers = []
+        if cfg["is_player_one_bot"]:
+            self.ai_player_numbers.append(1)
+        if cfg["is_player_two_bot"]:
+            self.ai_player_numbers.append(2)        
 
         self.move_sound = pygame.mixer.Sound("sounds/move-self.mp3")
         self.end_sound = pygame.mixer.Sound("sounds/game-end.mp3")

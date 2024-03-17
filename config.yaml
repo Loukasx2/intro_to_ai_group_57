@@ -1,5 +1,5 @@
-"is_player_one_bot": false
+"is_player_one_bot": true
 "is_player_two_bot": false
 "depth": 2
-"board_size": 9
+"board_size": 9 # must be an odd number
 "number_of_rows_with_pawns": 3
