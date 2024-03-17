@@ -10,6 +10,9 @@ with open("config.yaml", "r") as yamlfile:
     cfg = yaml.safe_load(yamlfile)
 
 DEPTH = cfg["depth"]
+ALPHA_BETA_PRUNING = cfg["alpha_beta_pruning"]
+
+number_of_explored_board_states = 0
 
 # get the player index from command line arguments
 player_index = int(sys.argv[1])
@@ -54,6 +57,9 @@ def evaluate(board, player_index, depth):
     # print(f"Score: {score_for_pawns_in_goals} + {score_for_distance_to_goal} + {score_for_pawns_on_own_goal}")
 
     score = score_for_pawns_in_goals + score_for_distance_to_goal + score_for_pawns_on_own_goal
+
+    global number_of_explored_board_states
+    number_of_explored_board_states += 1
 
     return score
 
@@ -106,7 +112,7 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
                     eval = minimax(copy.deepcopy(new_board), depth - 1, False, alpha, beta, player_index)
                     max_eval = max(max_eval, eval)
                     alpha = max(alpha, eval)
-                    if beta <= alpha:
+                    if beta <= alpha and ALPHA_BETA_PRUNING:
                         break
         return max_eval
     else:
@@ -121,14 +127,17 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
                 eval = minimax(copy.deepcopy(new_board), depth - 1, True, alpha, beta, player_index)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
-                if beta <= alpha:
+                if beta <= alpha and ALPHA_BETA_PRUNING:
                     break
         return min_eval
 
+calc_time_history = []
 while True:
     try:
         response = requests.get(f'http://localhost:5000/is_ai_turn/{player_index}')
-        if response.json().get('is_ai_turn'):
+        is_ai_turn = response.json().get('is_ai_turn')
+        if is_ai_turn:
+            number_of_explored_board_states = 0
             start_time = time.time()
             board = requests.get(f'http://localhost:5000/get_board').json()["board"]
             best_move = []
@@ -149,6 +158,7 @@ while True:
                             best_pawn = pawn
 
             finish_time = time.time()
+            calc_time_history.append(finish_time - start_time)
 
             print(f"Moving: {best_pawn} -> {best_move}, Time taken: {finish_time - start_time}, Eval: {best_eval}")
             requests.post(f'http://localhost:5000/move/{best_pawn[0]}/{best_pawn[1]}/{best_move[0]}/{best_move[1]}')
@@ -157,7 +167,10 @@ while True:
                         reached_goals.append(best_move)
                         furthest_goal_index += 1
                         furthest_goal = goals[furthest_goal_index]
+            mean_time = sum(calc_time_history) / len(calc_time_history)
+            # print(f"Mean time: {mean_time}")
+            # print(f"Number of explored board states: {number_of_explored_board_states}")
+        time.sleep(0.25)
     except Exception as e:
         pass
 
-    time.sleep(0.25)
