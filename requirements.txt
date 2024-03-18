@@ -1,0 +1,5 @@
+Flask==2.2.5
+numpy==1.26.4
+pygame==2.5.2
+PyYAML==6.0.1
+Requests==2.31.0
