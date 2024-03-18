@@ -24,6 +24,8 @@ _The `useful_functions.py` file, while accessible to both the engine and AI, ser
 
 ### Running the Project
 
+**Important Note:** This project has been tested only on Linux/Ubuntu environments and is known to have issues on Macs.
+
 This project is written in Python 3. Dependencies required to run the code are listed in a file named `requirements.txt`. You can install them using the following command:
 
 ```
