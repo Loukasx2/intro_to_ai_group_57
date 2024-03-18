@@ -178,9 +178,10 @@ while not requests.get(f'http://localhost:5000/is_over').json()["over"]:
 
 print("Game over!")
 
-# Add to csv type file the mean time and the board configuration (number of checkers and board size), as well as cfg board size and number of rows with pawns. Add also the AI player index and the game winner.
+# Add to csv type file the mean time and the board configuration (number of checkers and board size), as well as cfg board size and number of rows with pawns. Add also the AI player index and the game winner. Add also if the alpha beta pruning was used. Add number of explored board states.
 # If player index is 1, the AI is the first player.
 board = requests.get(f'http://localhost:5000/get_board').json()["board"]
-with open("results.csv", "a") as file:
-    file.write(f"{mean_time},{cfg['board_size']},{cfg['number_of_rows_with_pawns']},{player_index},{did_i_win(board)},{did_enemy_win(board)}\n")
-    file.close()
+if player_index == 1:
+    with open("results.csv", "a") as file:
+        file.write(f"{mean_time},{number_of_explored_board_states},{ALPHA_BETA_PRUNING},{cfg['board_size']},{cfg['number_of_rows_with_pawns']},{player_index},{did_i_win(board)}\n")
+        file.close()
