@@ -1,52 +1,68 @@
 # intro_to_ai_group_57
 
-Public repository for the group project in Introduction to AI course to implement an AI to play Chinese Checkers.
+This project implements an AI for Chinese Checkers.
 
-## Code structure
+# Code Structure
 
-The code is composed of three main files:
+The codebase consists of three essential Python files:
 
-- game_engine.py: Contains the game engine, which is responsible for running the game and keeping track of the game state.
-- AI.py: Contains the AI, which is responsible for making moves for a player.
-- useful_functions.py: Contains a set of useful functions that are used by both the game engine and the AI. Even though the AI is not allowed to use the game engine, it is allowed to use the useful functions, as it contains just a way to check the possible moves and being able to generate new board states based on the moves, which is necessary for the AI to work.
+1. **game_engine.py**: This file acts as the game's core, managing the board state, game logic, and graphical interface (if applicable). It is an adaptation of the repository [Chinese-Checkers](https://github.com/nourelhouda-taroudi/Chinese-checkers).]
+2. **AI.py**: This file houses the AI, responsible for analyzing the current board state and strategically selecting moves for its assigned player.
+3. **useful_functions.py**: This file contains helper functions utilized by both the game engine and AI. These functions provide essential functionalities like validating moves and simulating potential board states based on moves, crucial for the AI's decision-making process.
 
-The only interaction between the game engine and the AI is made through an API, which is defined in the game engine file. The AI is not allowed to access the game engine directly, and the game engine is not allowed to access the AI directly. The available endpoints are:
+**Encapsulation for Robustness:**
 
-- GET /is_ai_turn: Returns True if it is the AI's turn to play, and False otherwise.
-- GET /get_board: Returns the current board state.
-- POST /move/<int:pos_x>/<int:pos_y>/<int:target_x>/<int:target_y>: Makes a move from (pos_x, pos_y) to (target_x, target_y).
+**Crucially, the game engine and AI are strictly isolated to prevent unintended interactions.** They communicate solely through a well-defined API established within `game_engine.py`. This API offers controlled access to specific functionalities:
 
-## Running the code
+- **GET /is_ai_turn:** Confirms if it's the AI's turn (True) or not (False).
+- **GET /get_board:** Retrieves the current game state of the board.
+- **POST /move/<int:pos_x>/<int:pos_y>/<int:target_x>/<int:target_y>**: Executes a move from starting position (`pos_x`, `pos_y`) to the target position (`target_x`, `target_y`).
 
-The code is written in Python 3. There's a requirements.txt file that contains the necessary dependencies to run the code. To install the dependencies, run:
+**Important Note:**
+
+_The `useful_functions.py` file, while accessible to both the engine and AI, serves purely as a collection of helper functions._ There's **no direct exchange of information or decision-making logic** between the engine and AI through this file.
+
+### Running the Project
+
+This project is written in Python 3. Dependencies required to run the code are listed in a file named `requirements.txt`. You can install them using the following command:
 
 ```
+
 pip install -r requirements.txt
-```
-
-The file config.yaml contains configuration for the game and the AI. The following parameters are available:
-
-- is_player_one_bot: If true, player one will be controlled by the AI. If false, player one will be controlled by a human.
-- is_player_two_bot: If true, player two will be controlled by the AI. If false, player two will be controlled by a human.
-- depth: The depth of the search tree for the AI. The higher the depth, the more time it will take to make a move.
-- board_size: The size of the board. Must be an odd number.
-- number_of_rows_with_pawns: The number of rows with pawns for each player.
-- alpha_beta_pruning: If true, the AI will use alpha-beta pruning to optimize the search tree.
-
-To run the game engine:
 
 ```
+
+A configuration file named `config.yaml` allows you to customize game and AI settings:
+
+- **is_player_one_bot:** Set to `True` if Player 1 is controlled by the AI, `False` for human control.
+- **is_player_two_bot:** Set to `True` if Player 2 is controlled by the AI, `False` for human control.
+- **depth:** Defines the depth of the AI's search tree. Higher values result in more analysis time but potentially better moves.
+- **board_size:** Sets the size of the game board (must be an odd number).
+- **number_of_rows_with_pawns:** Specifies the number of starting pawn rows for each player.
+- **alpha_beta_pruning:** Enables (`True`) or disables (`False`) alpha-beta pruning for search tree optimization.
+
+**Launching the Game:**
+
+To run the game engine with a graphical interface, execute:
+
+```
+
 python game_engine.py
-```
-
-A window will open, and you will be able to play the game. Click on the piece you want to move, and then click on the target position. If the AI is playing, it will make a move automatically.
-
-To run the AI:
 
 ```
+
+This will open a window where you can click on pieces to move them. The AI will automatically make its moves if configured.
+
+**Running the AI:**
+
+To run the AI for a specific player (replace `$player_number` with the actual player number), use:
+
+```
+
 python AI.py $player_number
+
 ```
 
-With player_number indicating which player the random player is.
+**Important Note:**
 
-Each command need to be run in a different terminal.
+Run previous commands in separate terminal windows to ensure proper functionality.
