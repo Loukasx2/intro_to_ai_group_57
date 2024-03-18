@@ -311,19 +311,8 @@ class GameEngine():
 
 if __name__ == "__main__":
     print("Welcome to the game of Chinese Checkers!")
-    if len(sys.argv) < 2:
-        print(
-            "Default number of players is 2. If you want to change it, please provide a valid integer as an argument."
-        )
-        number_of_players = 2
-    else:
-        try:
-            number_of_players = int(sys.argv[1])
-        except ValueError:
-            print("Invalid number of players. Please provide a valid integer.")
-            sys.exit(1)
 
-    game = GameEngine(number_of_players)
+    game = GameEngine(2)
     # run game in thread
     game_thread = threading.Thread(target=game.run)
     game_thread.daemon = True
@@ -334,10 +323,6 @@ if __name__ == "__main__":
     app = flask.Flask(__name__)
     logging.getLogger('werkzeug').disabled = True
 
-    @app.route("/get_player_pawns/<int:player_index>", methods=["GET"])
-    def get_player_pawns(player_index):
-        return {"pawns": game.get_player_pawns(player_index)}
-    
     @app.route("/get_board", methods=["GET"])
     def get_board():
         return {"board": game.matrix.tolist()}
