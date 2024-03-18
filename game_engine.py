@@ -342,6 +342,10 @@ if __name__ == "__main__":
     def get_board():
         return {"board": game.matrix.tolist()}
     
+    @app.route("/is_over", methods=["GET"])
+    def is_over():
+        return {"over": game.check_winner()}
+    
     @app.route("/is_ai_turn/<int:player_index>", methods=["GET"])
     def is_ai_turn(player_index):
         return {"is_ai_turn": game.is_ai_turn(player_index)}

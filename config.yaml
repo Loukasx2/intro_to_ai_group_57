@@ -1,4 +1,4 @@
-"is_player_one_bot": false
+"is_player_one_bot": true
 "is_player_two_bot": true
 "depth": 2
 "board_size": 9 # must be an odd number

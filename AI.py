@@ -132,7 +132,8 @@ def minimax(board, depth, is_maximizing, alpha, beta, player_index):
         return min_eval
 
 calc_time_history = []
-while True:
+
+while not requests.get(f'http://localhost:5000/is_over').json()["over"]:
     try:
         response = requests.get(f'http://localhost:5000/is_ai_turn/{player_index}')
         is_ai_turn = response.json().get('is_ai_turn')
@@ -168,9 +169,18 @@ while True:
                         furthest_goal_index += 1
                         furthest_goal = goals[furthest_goal_index]
             mean_time = sum(calc_time_history) / len(calc_time_history)
+
             # print(f"Mean time: {mean_time}")
             # print(f"Number of explored board states: {number_of_explored_board_states}")
         time.sleep(0.25)
     except Exception as e:
         pass
 
+print("Game over!")
+
+# Add to csv type file the mean time and the board configuration (number of checkers and board size), as well as cfg board size and number of rows with pawns. Add also the AI player index and the game winner.
+# If player index is 1, the AI is the first player.
+board = requests.get(f'http://localhost:5000/get_board').json()["board"]
+with open("results.csv", "a") as file:
+    file.write(f"{mean_time},{cfg['board_size']},{cfg['number_of_rows_with_pawns']},{player_index},{did_i_win(board)},{did_enemy_win(board)}\n")
+    file.close()
