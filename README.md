@@ -2,11 +2,13 @@
 
 This project implements an AI for Chinese Checkers.
 
+Our group repository can be found here [Group 57](https://github.com/Loukasx2/intro_to_ai_group_57).
+
 # Code Structure
 
 The codebase consists of three essential Python files:
 
-1. **game_engine.py**: This file acts as the game's core, managing the board state, game logic, and graphical interface (if applicable). It is an adaptation of the repository [Chinese-Checkers](https://github.com/nourelhouda-taroudi/Chinese-checkers).]
+1. **game_engine.py**: This file acts as the game's core, managing the board state, game logic, and graphical interface (if applicable). It is an adaptation of the repository [Chinese-Checkers](https://github.com/nourelhouda-taroudi/Chinese-checkers).
 2. **AI.py**: This file houses the AI, responsible for analyzing the current board state and strategically selecting moves for its assigned player.
 3. **useful_functions.py**: This file contains helper functions utilized by both the game engine and AI. These functions provide essential functionalities like validating moves and simulating potential board states based on moves, crucial for the AI's decision-making process.
 
@@ -24,7 +26,7 @@ _The `useful_functions.py` file, while accessible to both the engine and AI, ser
 
 ### Running the Project
 
-**Important Note:** This project has been tested only on Linux/Ubuntu environments and is known to have issues on Macs.
+**Important Note:** This project has been tested successfully only on Linux/Ubuntu and Windows environments and is known to have issues on Macs.
 
 This project is written in Python 3. Dependencies required to run the code are listed in a file named `requirements.txt`. You can install them using the following command:
 
